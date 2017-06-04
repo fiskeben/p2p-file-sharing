@@ -1,0 +1,23 @@
+{
+  "name": "p2p-file-sharing",
+  "version": "1.0.0",
+  "description": "This is my result of following the [P2P file sharing tutorial/workshop](https://mafintosh.github.io/p2p-file-sharing-workshop) by [@mafintosh](https://github.com/mafintosh) and [@watson](https://github.com/watson).",
+  "main": "server.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "discovery-channel": "^5.4.4",
+    "fixed-size-chunk-hashing": "^1.0.0",
+    "fs-chunk-store": "^1.6.5",
+    "hash-of-stream": "^1.0.0",
+    "msgpack5-stream": "^1.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
