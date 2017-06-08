@@ -18,26 +18,36 @@ channel.once('peer', (id, peer) => {
   let hashes;
   let store;
 
-  const filename = `output-${Date.now().toString().substring(8)}.stuff`;
   const client = net.connect(peer.port, peer.host);
   const protocol = msgpack(client);
 
   const initializeTransfer = (msg) => {
-    console.log('👍 Hashes are valid, initializing transfer');
+    console.log('👍 Hashes are valid, initializing transfer', msg);
     hashes = msg.hashes;
+    const filename = msg.filename || `output-${Date.now().toString().substring(8)}.stuff`;
 
     console.log('Initializing store with chunk size %s and file size %s', msg.chunkSize, msg.fileSize);
     store = new Chunkstore(msg.chunkSize, filename, msg.fileSize);
-    store.on('completed', onTransferComplete);
+    store.on('completed', () => { onTransferComplete(filename); });
     const expectedChunks = Math.ceil(msg.fileSize / msg.chunkSize);
     console.log('Requesting chunks...')
-    for (let i = 0; i < expectedChunks; i++) {
-      const chunkRequest = { type: 'request', index: i };
-      protocol.write(chunkRequest);
+    const dispatcher = (from, to) => {
+      while (from < to && from < expectedChunks) {
+        const request = { type: 'request', index: from }
+        console.log(request)
+        protocol.write(request)
+        from++
+      }
+      if (from < expectedChunks) {
+        setImmediate(() => {
+          dispatcher(to, to + 500)
+        })
+      }
     }
+    dispatcher(0, 500)
   }
 
-  const onTransferComplete = () => {
+  const onTransferComplete = (filename) => {
     console.log('Transfer complete, written to %s', filename);
     protocol.destroy();
     channel.destroy();
@@ -67,6 +77,7 @@ channel.once('peer', (id, peer) => {
         const data = msg.data;
         replacementHasher.equals(hashes[msg.index], data).then(
           () => {
+            console.log('got chunk')
             store.put(msg.index, data, (err) => {
               if (err) throw err;
             });

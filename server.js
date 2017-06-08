@@ -27,6 +27,13 @@ const formatResponse = (index, chunk) => {
   };
 }
 
+const filenameFromPotentialPath = (potentialPath) => {
+  const parts = potentialPath.split('/');
+  if (parts.length > 0) {
+    return parts[parts.length - 1];
+  }
+}
+
 const chunkHandlerForIndexAndProtocol = (index, protocol) => {
   return (err, foundChunk) => {
     const response = formatResponse(index, foundChunk);
@@ -39,6 +46,7 @@ const handshakeHandlerForProtocol = (protocol) => {
     const response = {
       type: 'handshake',
       hashes,
+      filename: filenameFromPotentialPath(filename),
       fileSize: FILE_LENGTH,
       chunkSize: CHUNK_SIZE
     };
